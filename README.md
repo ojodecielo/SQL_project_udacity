@@ -10,5 +10,9 @@ The following movie categories are considered family-friendly: Animation, Childr
 ### Query 2
 How much did top 10 customers spent in 2007? The query displays the top 10 paying customers, how many payments they made on a monthly basis during 2007, and how much the amount of those payments was. See the bar chart on Slide 2.
 
+### Query 3
+Distribution of family movies per rental duration
+quartile within each category. The query lists the family-friendly film category, each of the quartiles, and the corresponding count of movies within each combination of film category for each corresponding rental duration category. See Slide 3.
+
 ## Source database
 Available under [link](http://www.postgresqltutorial.com/postgresql-sample-database/).
