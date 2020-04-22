@@ -14,5 +14,8 @@ How much did top 10 customers spent in 2007? The query displays the top 10 payin
 Distribution of family movies per rental duration
 quartile within each category. The query lists the family-friendly film category, each of the quartiles, and the corresponding count of movies within each combination of film category for each corresponding rental duration category. See Slide 3.
 
+### Query 4
+How many rental orders did each store process? We compare the two rental stores in their count of rental orders during every month for all the years we have data for. See Slide 4.
+
 ## Source database
 Available under [link](http://www.postgresqltutorial.com/postgresql-sample-database/).
