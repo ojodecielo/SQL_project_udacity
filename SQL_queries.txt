@@ -1,0 +1,104 @@
+/* Query 1: Rental of family-friedly movies */
+
+WITH sub AS (
+	SELECT f.title AS film_title, c.name AS category_name
+	FROM category c
+		JOIN film_category fc
+		ON c.category_id = fc.category_id
+
+		JOIN film f
+		ON fc.film_id = f.film_id
+
+		JOIN inventory i
+		ON f.film_id = i.film_id
+
+		JOIN rental r
+		ON i.inventory_id = r.inventory_id
+
+	WHERE c.name IN ('Animation', 'Children', 'Classics', 'Comedy', 'Family', 'Music')
+	)
+
+SELECT DISTINCT *, 
+	COUNT(film_title) OVER (PARTITION BY film_title)
+FROM sub
+ORDER BY 2, 1, 3 DESC;
+
+/* Query 2: How much did top 10 customers spent in 2007? */
+
+WITH sub1 AS (
+	SELECT c.customer_id,
+		(c.first_name || ' ' || c.last_name) AS full_name,
+    		p.amount,
+    		p.payment_date
+	FROM payment p
+
+		JOIN customer c
+		ON p.customer_id = c.customer_id),
+
+    sub2 AS (
+	SELECT sub1.customer_id
+	FROM sub1
+	GROUP BY 1
+	ORDER BY SUM(sub1.amount) DESC
+	LIMIT 10),
+
+    sub3 AS (
+	SELECT TO_CHAR(sub1.payment_date, 'MM/YYYY') AS pay_mon,
+		sub1.full_name,
+		COUNT(*) AS pay_countpermon,
+		SUM(sub1.amount) AS pay_amount
+	FROM sub1
+
+		JOIN sub2
+		ON sub1.customer_id = sub2.customer_id
+
+	GROUP BY 1, 2
+	ORDER BY 1, 3, 2
+	) 
+
+SELECT * FROM sub3
+ORDER BY 2, 1;
+
+/* Query 3: Distribution of family movies per rental duration quartile within each category */
+
+WITH sub AS (
+  	SELECT c.name AS film_category,
+  		NTILE(4) OVER (ORDER BY f.rental_duration) AS standard_quartile
+	FROM category c
+
+		JOIN film_category fc
+		ON c.category_id = fc.category_id
+
+		JOIN film f
+		ON fc.film_id = f.film_id
+
+	WHERE c.name IN ('Animation', 'Children', 'Classics', 'Comedy', 'Family', 'Music')
+	)
+
+SELECT film_category, 
+	standard_quartile,
+    	COUNT(*) 
+FROM sub
+GROUP BY 1, 2
+ORDER BY 1, 2;
+
+/* Query 4: How many rental orders did each store process? */
+
+WITH rentals AS (
+	SELECT DATE_PART('month', r.rental_date) AS rental_month,
+		DATE_PART('year', r.rental_date) AS rental_year,
+    		i.store_id AS store_id,
+		COUNT (i.film_id) OVER (PARTITION BY DATE_TRUNC('month', r.rental_date) ORDER BY i.store_id)  AS count_rentals
+	FROM rental AS r
+
+		JOIN inventory AS i
+		ON r.inventory_id = i.inventory_id
+	)
+
+SELECT rental_month, rental_year, 
+	store_id,
+	COUNT(count_rentals)
+FROM rentals
+GROUP BY 1, 2, 3
+ORDER BY 4 DESC;
+
